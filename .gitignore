@@ -1,0 +1,8 @@
+# Ignore Node Modules
+node_modules/
+
+# Ignore TS Build artifacts
+**/*.js
+**/*.d.ts
+**/*.js.map
+
