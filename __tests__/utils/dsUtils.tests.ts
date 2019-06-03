@@ -44,4 +44,38 @@ describe(`DS Util Tests`, () => {
         expect(foundPath.path).toBe(preqWebAppPath);
         return;
     });
+
+    /**
+     * Find the file for a module that has been concatenated
+     * In this scenario individual files will not exist
+     * instead they will be outputted into a single module file
+     */
+    it(`Get Module from BSF - Concatenated`, async () => {
+        const prereq = `\\\\ap-bri-san03b\\\\R422\\\\BSF\\win_b64\\webapps`;
+        const moduleID = `DS/ApplicationFrame/PlayerButton`;
+        const expectedPath = path.resolve(
+            prereq,
+            `ApplicationFrame/ApplicationFrame.js`,
+        );
+
+        const modulePath = await dsUtils.doesModuleExistForWebApps(moduleID, prereq);
+        expect(modulePath).toBe(expectedPath);
+    });
+
+    /**
+     * Find the file for a module that has not been concatenated.
+     * In this scenario js files have been outputted into the structure
+     * as defined in the Module ID
+     */
+    it(`Get Module from BSF - Individual Files`, async () => {
+        const webappsPath = `\\\\ap-bri-san03b\\\\R422\\\\BSF\\win_b64\\webapps`;
+        const moduleID = `DS/GEOCommonClient/Services/ServiceBase`;
+        const expectedPath = path.resolve(
+            webappsPath,
+            `GEOCommonClient/Services/ServiceBase.js`,
+        );
+
+        const modulePath = await dsUtils.doesModuleExistForWebApps(moduleID, webappsPath);
+        expect(modulePath).toBe(expectedPath);
+    });
 });

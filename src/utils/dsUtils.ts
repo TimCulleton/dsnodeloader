@@ -115,3 +115,49 @@ export function getDSModuleFilePath(moduleID: string): string {
 
     return filePath;
 }
+
+export async function getFilePathForDSModule(moduleID: string, prereqs?: string[]): Promise<string> {
+    prereqs = prereqs || PreReqPaths;
+
+    let filePath = "";
+    for (const prereq of prereqs) {
+        filePath = await doesModuleExistForWebApps(moduleID, prereq);
+        if (filePath) { break; }
+    }
+
+    return filePath;
+}
+
+/**
+ * Check to see if the specified module exists in the webAppsPath.
+ * This will first try to find concatenated module where if that fails
+ * it will fall back to searching for the individual module.
+ *
+ * If the module is found the path will be returned else an empty string
+ *
+ * @param {string} moduleID - DS Module to attempt to find
+ * @param {strin} webAppsPath - WebAppsPath search in
+ */
+export async function doesModuleExistForWebApps(moduleID: string, webAppsPath: string): Promise<string> {
+    const moduleName = getDSModuleName(moduleID);
+    const concatenatedModulePath = path.resolve(
+        webAppsPath,
+        moduleName,
+        moduleName + ".js",
+    );
+
+    // Concatenated Module
+    let found = await fsExists(concatenatedModulePath);
+    if (found) {
+        return concatenatedModulePath;
+    } else {
+        // Single Module
+        const modulePath = path.resolve(
+            webAppsPath,
+            getDSModuleFilePath(moduleID) + ".js",
+        );
+
+        found = await fsExists(modulePath);
+        return found ? modulePath : "";
+    }
+}
