@@ -96,4 +96,43 @@ describe(`DS Util Tests`, () => {
         const modulePath = await DSUtils.instance.doesModuleExistForWebApps(moduleID, webappsPath);
         expect(modulePath).toBe(expectedPath);
     });
+
+    /**
+     * Search for DS module file from multiple Prerequisite paths.
+     * This will get a hit from the first path - local
+     */
+    it(`Get DS Module file path from multiple prerequisites - local file`, async () => {
+
+        const local = "D:\\Dev\\gitWorkspaces\\WebApps";
+        const BSF = "\\\\ap-bri-san03b\\R422\\BSF";
+        const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
+
+        await DSUtils.instance.setPrereqs([local, BSF, BSFTST]);
+        const filePath = await DSUtils.instance.getFilePathForDSModule(`DS/GEOCommonClient/Services/ServiceBase`);
+
+        expect(filePath).toBe(path.resolve(local, `win_b64/webapps/GEOCommonClient/Services/ServiceBase.js`));
+    });
+
+    /**
+     * Search for DS module file from multiple Prerequisite paths.
+     * This will get a hit from the second path and will get the concatenated module
+     */
+    it(`Get DS Module file path from multiple prerequisites - BSF file`, async () => {
+
+        const local = "D:\\Dev\\gitWorkspaces\\WebApps";
+        const BSF = "\\\\ap-bri-san03b\\R422\\BSF";
+        const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
+
+        const moduleID = `DS/ApplicationFrame/PlayerButton`;
+        const expectedPath = path.resolve(
+            BSF,
+            `win_b64/webapps`,
+            `ApplicationFrame/ApplicationFrame.js`,
+        );
+
+        await DSUtils.instance.setPrereqs([local, BSF, BSFTST]);
+        const filePath = await DSUtils.instance.getFilePathForDSModule(moduleID);
+
+        expect(filePath).toBe(path.resolve(local, expectedPath));
+    });
 });

@@ -181,6 +181,13 @@ export class DSUtils {
         return filePath;
     }
 
+    /**
+     * Find the file path for the supplied DS Module by looking in the currently stored
+     * Prerequisite webApps locations or against the optionally supplied webAppPaths.
+     * This will search through the prerequisites in the order they are stored.
+     * @param {string} moduleID - DS Module to find the path for
+     * @param {string[]} [webAppPaths] - Optional WebAppPaths to control where to look
+     */
     public async getFilePathForDSModule(moduleID: string, webAppPaths?: string[]): Promise<string> {
         webAppPaths = webAppPaths || Object.values(this.webAppPaths);
 
@@ -201,7 +208,7 @@ export class DSUtils {
      * If the module is found the path will be returned else an empty string
      *
      * @param {string} moduleID - DS Module to attempt to find
-     * @param {strin} webAppsPath - WebAppsPath search in
+     * @param {string} webAppsPath - WebAppsPath search in
      */
     public async doesModuleExistForWebApps(moduleID: string, webAppsPath: string): Promise<string> {
         const moduleName = this.getDSModuleName(moduleID);
