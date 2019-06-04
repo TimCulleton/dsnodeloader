@@ -232,4 +232,82 @@ describe(`DS Util Tests`, () => {
 
         expect(filePath).toBe(path.resolve(local, expectedPath));
     });
+
+    it(`Read DS Module File`, async () => {
+        const local = "D:\\Dev\\gitWorkspaces\\WebApps";
+        const BSF = "\\\\ap-bri-san03b\\R422\\BSF";
+        const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
+        const moduleID = `DS/ApplicationFrame/PlayerButton`;
+
+        const localWebApps = path.resolve(local, WIN_B64, WEB_APPS);
+        const BSFWebApps = path.resolve(BSF, WIN_B64, WEB_APPS);
+        const BSFTSTWebApps = path.resolve(BSFTST, WIN_B64, WEB_APPS);
+
+        const expectedPath = path.resolve(
+            BSF,
+            WIN_B64,
+            WEB_APPS,
+            `ApplicationFrame/ApplicationFrame.js`,
+        );
+
+        if (UseMock) {
+            const pathMap = [
+                localWebApps,
+                BSFWebApps,
+                BSFTSTWebApps,
+                expectedPath,
+            ].reduce((accumulator, key) => {
+                accumulator[key] = true;
+                return accumulator;
+            }, {} as { [key: string]: boolean });
+
+            const fileChecker: FileExists = async (suppliedPath) => {
+                return !!pathMap[suppliedPath as string];
+            };
+            dsUtils.updateFileUtils("fsExists", fileChecker);
+
+            // Mock out the read file to return random data
+            // Also validate that the supplied path is correct
+            dsUtils.updateFileUtils("readFile", async (moduleFilePath, encoding) => {
+                expect(moduleFilePath).toBe(expectedPath);
+                expect(encoding).toBe("utf8");
+                return "random data";
+            });
+        }
+
+        await dsUtils.setPrereqs([local, BSF, BSFTST]);
+        const fileContent = await dsUtils.readDSModule(moduleID);
+        expect(fileContent).toBeTruthy();
+    });
+
+    it(`Read DS Module File - File does not exist Throw Error`, async () => {
+        const local = "D:\\Dev\\gitWorkspaces\\WebApps";
+        const BSF = "\\\\ap-bri-san03b\\R422\\BSF";
+        const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
+        const moduleID = `DS/Fake/Fake`;
+
+        const localWebApps = path.resolve(local, WIN_B64, WEB_APPS);
+        const BSFWebApps = path.resolve(BSF, WIN_B64, WEB_APPS);
+        const BSFTSTWebApps = path.resolve(BSFTST, WIN_B64, WEB_APPS);
+
+        if (UseMock) {
+            const pathMap = [
+                localWebApps,
+                BSFWebApps,
+                BSFTSTWebApps,
+            ].reduce((accumulator, key) => {
+                accumulator[key] = true;
+                return accumulator;
+            }, {} as { [key: string]: boolean });
+
+            const fileChecker: FileExists = async (suppliedPath) => {
+                return !!pathMap[suppliedPath as string];
+            };
+            dsUtils.updateFileUtils("fsExists", fileChecker);
+        }
+
+        await dsUtils.setPrereqs([local, BSF, BSFTST]);
+
+        expect(dsUtils.readDSModule(moduleID)).rejects.toThrow(new Error(`Unable to find file for: ${moduleID}`));
+    });
 });

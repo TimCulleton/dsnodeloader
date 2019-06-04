@@ -6,6 +6,7 @@ import util = require("util");
 // tslint:disable: variable-name
 
 export type FileExists = (path: fs.PathLike) => Promise<boolean>;
+export type ReadFile = (path: string, encoding: string) => Promise<string>;
 
 export interface IWebAppPaths { [key: string]: string; }
 
@@ -15,7 +16,14 @@ export interface IFileUtils {
      * Helper to test that a file/dir exists
      */
     fsExists: FileExists;
+
+    /**
+     * Helper to read a file
+     */
+    readFile: ReadFile;
 }
+
+const ReadFile = util.promisify(fs.readFile);
 
 export const WIN_B64 = "win_b64";
 export const LINUX_A64 = "linux_a64";
@@ -39,6 +47,7 @@ export class DSUtils {
     constructor() {
         this._fileUtils = {
             fsExists: util.promisify(fs.exists),
+            readFile: util.promisify(fs.readFile),
         };
 
         this._webAppPaths = {};
@@ -60,6 +69,13 @@ export class DSUtils {
      */
     private get fsExists(): FileExists {
         return this._fileUtils.fsExists;
+    }
+
+    /**
+     * Async File Reader
+     */
+    private get readFile(): ReadFile {
+        return this._fileUtils.readFile;
     }
 
     /**
@@ -198,6 +214,25 @@ export class DSUtils {
         }
 
         return filePath;
+    }
+
+    /**
+     * Read the contents of a DS Module and return the string result back.
+     * This will search through the current prerequisites or through the supplied
+     * webAppsPaths to find the module file.
+     *
+     * If no module file is found an exception will be thrown
+     * @throws
+     * @param {string} moduleID - DS Module we are trying to load
+     * @param {string[]} [webAppPaths] - Optional collection of webAppPaths to search through
+     */
+    public async readDSModule(moduleID: string, webAppPaths?: string[]): Promise<string> {
+        const modulePath = await this.getFilePathForDSModule(moduleID, webAppPaths);
+        if (modulePath) {
+            return this.readFile(modulePath, `utf8`);
+        } else {
+            throw new Error(`Unable to find file for: ${moduleID}`);
+        }
     }
 
     /**
