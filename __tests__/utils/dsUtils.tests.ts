@@ -1,7 +1,23 @@
 import path = require("path");
 import { DSUtils } from "../../src/utils/dsUtils";
+import { FileExists } from "../../src/utils/dsUtils";
+import { WIN_B64 } from "../../src/utils/dsUtils";
+import { WEB_APPS } from "../../src/utils/dsUtils";
 
 describe(`DS Util Tests`, () => {
+    let dsUtils: DSUtils;
+
+    /**
+     * Flag to control if the file checker should be
+     * mocked out.
+     * False will cause the the checkers to properly
+     * access the files via the files system
+     */
+    const UseMock = true;
+
+    beforeEach(() => {
+        dsUtils = new DSUtils();
+    });
 
     it(`Is DS Module with DS Prefix - True`, () => {
         const moduleID = `DS/GEOExplorationCorpusClient/Services/dsexplorationService`;
@@ -52,9 +68,16 @@ describe(`DS Util Tests`, () => {
             "\\\\ap-bri-san03b\\R422\\BSFTST": path.resolve(`\\\\ap-bri-san03b\\R422\\BSFTST`, "win_b64", "webapps"),
         } as { [key: string]: string };
 
-        await DSUtils.instance.setPrereqs(Object.keys(expectedData));
+        if (UseMock) {
+            const fsChecker: FileExists = async (webappPath) => {
+                const values = Object.values(expectedData);
+                return values.indexOf(webappPath as string) !== -1;
+            };
+            dsUtils.updateFileUtils("fsExists", fsChecker);
+        }
 
-        const data = DSUtils.instance.webAppPaths;
+        await dsUtils.setPrereqs(Object.keys(expectedData));
+        const data = dsUtils.webAppPaths;
         const keys = Object.keys(expectedData);
         expect(Object.keys(data).length).toBe(keys.length);
 
@@ -76,7 +99,14 @@ describe(`DS Util Tests`, () => {
             `ApplicationFrame/ApplicationFrame.js`,
         );
 
-        const modulePath = await DSUtils.instance.doesModuleExistForWebApps(moduleID, prereq);
+        if (UseMock) {
+            const fileChecker: FileExists = async (filePath) => {
+                return true;
+            };
+            dsUtils.updateFileUtils("fsExists", fileChecker);
+        }
+
+        const modulePath = await dsUtils.doesModuleExistForWebApps(moduleID, prereq);
         expect(modulePath).toBe(expectedPath);
     });
 
@@ -93,7 +123,23 @@ describe(`DS Util Tests`, () => {
             `GEOCommonClient/Services/ServiceBase.js`,
         );
 
-        const modulePath = await DSUtils.instance.doesModuleExistForWebApps(moduleID, webappsPath);
+        // When mocking we reject the first file check as it will attempt to find
+        // the concatenated module.
+        if (UseMock) {
+            const moduleName = dsUtils.getDSModuleName(moduleID);
+            const concatPath = path.resolve(
+                webappsPath,
+                moduleName,
+                moduleName + ".js",
+            );
+
+            const fileChecker: FileExists = async (inputPath) => {
+                return inputPath !== concatPath;
+            };
+            dsUtils.updateFileUtils("fsExists", fileChecker);
+        }
+
+        const modulePath = await dsUtils.doesModuleExistForWebApps(moduleID, webappsPath);
         expect(modulePath).toBe(expectedPath);
     });
 
@@ -106,11 +152,40 @@ describe(`DS Util Tests`, () => {
         const local = "D:\\Dev\\gitWorkspaces\\WebApps";
         const BSF = "\\\\ap-bri-san03b\\R422\\BSF";
         const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
+        const moduleID = `DS/GEOCommonClient/Services/ServiceBase`;
 
-        await DSUtils.instance.setPrereqs([local, BSF, BSFTST]);
-        const filePath = await DSUtils.instance.getFilePathForDSModule(`DS/GEOCommonClient/Services/ServiceBase`);
+        const localWebApps = path.resolve(local, WIN_B64, WEB_APPS);
+        const BSFWebApps = path.resolve(BSF, WIN_B64, WEB_APPS);
+        const BSFTSTWebApps = path.resolve(BSFTST, WIN_B64, WEB_APPS);
+        const moduleName = dsUtils.getDSModuleFilePath(moduleID);
 
-        expect(filePath).toBe(path.resolve(local, `win_b64/webapps/GEOCommonClient/Services/ServiceBase.js`));
+        const LocalModuleFilePath = path.resolve(
+            localWebApps,
+            moduleName + ".js",
+        );
+
+        // return true for the initial webapps dirs and the local modulePath
+        if (UseMock) {
+            const pathMap = [
+                localWebApps,
+                BSFWebApps,
+                BSFTSTWebApps,
+                LocalModuleFilePath,
+            ].reduce((accumulator, key) => {
+                accumulator[key] = true;
+                return accumulator;
+            }, {} as { [key: string]: boolean });
+
+            const fileChecker: FileExists = async (suppliedPath) => {
+                return !!pathMap[suppliedPath as string];
+            };
+            dsUtils.updateFileUtils("fsExists", fileChecker);
+        }
+
+        await dsUtils.setPrereqs([local, BSF, BSFTST]);
+        const filePath = await dsUtils.getFilePathForDSModule(moduleID);
+
+        expect(filePath).toBe(LocalModuleFilePath);
     });
 
     /**
@@ -122,16 +197,38 @@ describe(`DS Util Tests`, () => {
         const local = "D:\\Dev\\gitWorkspaces\\WebApps";
         const BSF = "\\\\ap-bri-san03b\\R422\\BSF";
         const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
-
         const moduleID = `DS/ApplicationFrame/PlayerButton`;
+
+        const localWebApps = path.resolve(local, WIN_B64, WEB_APPS);
+        const BSFWebApps = path.resolve(BSF, WIN_B64, WEB_APPS);
+        const BSFTSTWebApps = path.resolve(BSFTST, WIN_B64, WEB_APPS);
+
         const expectedPath = path.resolve(
             BSF,
-            `win_b64/webapps`,
+            WIN_B64,
+            WEB_APPS,
             `ApplicationFrame/ApplicationFrame.js`,
         );
 
-        await DSUtils.instance.setPrereqs([local, BSF, BSFTST]);
-        const filePath = await DSUtils.instance.getFilePathForDSModule(moduleID);
+        if (UseMock) {
+            const pathMap = [
+                localWebApps,
+                BSFWebApps,
+                BSFTSTWebApps,
+                expectedPath,
+            ].reduce((accumulator, key) => {
+                accumulator[key] = true;
+                return accumulator;
+            }, {} as { [key: string]: boolean });
+
+            const fileChecker: FileExists = async (suppliedPath) => {
+                return !!pathMap[suppliedPath as string];
+            };
+            dsUtils.updateFileUtils("fsExists", fileChecker);
+        }
+
+        await dsUtils.setPrereqs([local, BSF, BSFTST]);
+        const filePath = await dsUtils.getFilePathForDSModule(moduleID);
 
         expect(filePath).toBe(path.resolve(local, expectedPath));
     });
