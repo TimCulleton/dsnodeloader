@@ -4,7 +4,7 @@
   "description": "Module loader for node that works with DS modules",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -14,8 +14,10 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^24.0.13",
+    "@types/nock": "^10.0.3",
     "@types/node": "^12.0.4",
     "jest": "^24.8.0",
+    "nock": "^10.0.6",
     "ts-jest": "^24.0.2",
     "ts-lint": "^4.5.1",
     "typescript": "^3.5.1"

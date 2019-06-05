@@ -224,6 +224,7 @@ export class ModuleWebGetter implements IModuleGetter {
 
             const buffer: string[] = [];
             const requestUrl = `${this.isHttps ? `https` : `http`}://${config.host}:${config.port}${config.path}`;
+            console.log(`Making Request: ${requestUrl}`);
             const request = requester.get(config, (response) => {
 
                 response.on("data", (data: string) => {
@@ -250,6 +251,8 @@ export class ModuleWebGetter implements IModuleGetter {
             request.on("error", (e) => {
                 reject(e);
             });
+
+            request.end();
         });
     }
 }

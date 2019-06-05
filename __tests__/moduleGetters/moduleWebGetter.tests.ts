@@ -1,7 +1,13 @@
+import nock = require("nock");
 import { ModuleWebGetter } from "../../src/moduleGetters/moduleWebGetter";
 
 describe(`Module Web Getter Tests`, () => {
     let moduleGetter: ModuleWebGetter;
+
+    /**
+     * Enables running of tests that mock out http request calls
+     */
+    const UseMock = true;
 
     beforeEach(() => {
         moduleGetter = new ModuleWebGetter();
@@ -37,8 +43,16 @@ describe(`Module Web Getter Tests`, () => {
     it(`Get Module Path - Non Concatenated`, async () => {
         const moduleID = `DS/GEOCommonClient/Services/ServiceBase`;
         const hostUrl = `http://localhost:8176`;
-        const expectedPath = `${hostUrl}/GEOCommonClient/Services/ServiceBase.js`;
 
+        if (UseMock) {
+            nock(hostUrl)
+                .get(`/GEOCommonClient/GEOCommonClient.js`)
+                .reply(404)
+                .get(`/GEOCommonClient/Services/ServiceBase.js`)
+                .reply(200, "random content");
+        }
+
+        const expectedPath = `${hostUrl}/GEOCommonClient/Services/ServiceBase.js`;
         const requestPath = await moduleGetter.setHostUrl(hostUrl).getModulePath(moduleID);
         expect(requestPath).toBe(expectedPath);
     });
@@ -50,6 +64,14 @@ describe(`Module Web Getter Tests`, () => {
     it(`Get Module Data`, async () => {
         const moduleID = `DS/GEOCommonClient/Services/ServiceBase`;
         const hostUrl = `http://localhost:8176`;
+
+        if (UseMock) {
+            nock(hostUrl)
+                .get(`/GEOCommonClient/GEOCommonClient.js`)
+                .reply(404)
+                .get(`/GEOCommonClient/Services/ServiceBase.js`)
+                .reply(200, "random content");
+        }
 
         moduleGetter.setHostUrl(hostUrl);
         const responseData = await moduleGetter.getModule(moduleID);
