@@ -4,6 +4,7 @@
   "description": "Module loader for node that works with DS modules",
   "main": "index.js",
   "scripts": {
+    "postinstall": "tsc -p ./",
     "test": "jest"
   },
   "repository": {
