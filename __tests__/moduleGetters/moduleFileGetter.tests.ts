@@ -20,6 +20,12 @@ describe(`Module File Getter Tests`, () => {
         const preqPath = `\\\\ap-bri-san03b\\\\R422\\\\BSF`;
 
         const preqWebAppPath = path.resolve(preqPath, "win_b64", "webapps");
+
+        if (UseMock) {
+            moduleFileGetter.updateFileUtils("fsExists", async (preqPath: string) => {
+                return preqPath === preqWebAppPath;
+            })
+        }
         const foundPath = await moduleFileGetter.getWebAppPathForPrerequisite(preqPath);
 
         expect(foundPath.path).toBe(preqWebAppPath);
