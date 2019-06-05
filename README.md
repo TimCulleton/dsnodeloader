@@ -1,4 +1,4 @@
-# DSNodeLoader
+# DSNodeLoader [![Build Status](https://travis-ci.com/XeroSkill/dsnodeloader.svg?branch=master)](https://travis-ci.com/XeroSkill/dsnodeloader)
 
 Node Module Loader that works with DS AMD Loader
 
