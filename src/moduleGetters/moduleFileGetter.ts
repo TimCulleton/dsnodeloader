@@ -1,10 +1,7 @@
 import fs = require("fs");
 import path = require("path");
 import util = require("util");
-import { DSUtils } from "../utils/dsUtils";
-import { WIN_B64 } from "../utils/dsUtils";
-import { LINUX_A64 } from "../utils/dsUtils";
-import { WEB_APPS } from "../utils/dsUtils";
+import dsUtils = require("../utils/dsUtils");
 import { IModuleGetter } from "./moduleGetterTypes";
 import { IResponseData } from "./moduleGetterTypes";
 
@@ -140,7 +137,7 @@ export class ModuleFileGetter implements IModuleGetter {
      */
     public async getWebAppPathForPrerequisite(prereqPath: string): Promise<{ prereq: string, path: string }> {
         return new Promise<{ prereq: string, path: string }>(async (resolve) => {
-            let webAppPath = path.resolve(prereqPath, WIN_B64, WEB_APPS);
+            let webAppPath = path.resolve(prereqPath, dsUtils.WIN_B64, dsUtils.WEB_APPS);
 
             let exists = await this.fsExists(webAppPath);
             if (exists) {
@@ -150,7 +147,7 @@ export class ModuleFileGetter implements IModuleGetter {
                 });
             } else {
 
-                webAppPath = path.resolve(prereqPath, LINUX_A64, WEB_APPS);
+                webAppPath = path.resolve(prereqPath, dsUtils.LINUX_A64, dsUtils.WEB_APPS);
                 exists = await this.fsExists(webAppPath);
 
                 resolve({
@@ -188,7 +185,7 @@ export class ModuleFileGetter implements IModuleGetter {
      * @param {string} webAppsPath - WebAppsPath search in
      */
     public async doesModuleExistForWebApps(moduleID: string, webAppsPath: string): Promise<string> {
-        const moduleName = DSUtils.instance.getDSModuleName(moduleID);
+        const moduleName = dsUtils.getDSModuleName(moduleID);
         const concatenatedModulePath = path.resolve(
             webAppsPath,
             moduleName,
@@ -203,7 +200,7 @@ export class ModuleFileGetter implements IModuleGetter {
             // Single Module
             const modulePath = path.resolve(
                 webAppsPath,
-                DSUtils.instance.getDSModuleFilePath(moduleID) + ".js",
+                dsUtils.getDSModuleFilePath(moduleID) + ".js",
             );
 
             found = await this.fsExists(modulePath);

@@ -1,9 +1,7 @@
 import path = require("path");
 import { ModuleFileGetter } from "../../src/moduleGetters/moduleFileGetter";
 import { FileExists } from "../../src/moduleGetters/moduleFileGetter";
-import { WIN_B64 } from "../../src/utils/dsUtils";
-import { WEB_APPS } from "../../src/utils/dsUtils";
-import { DSUtils } from "../../src/utils/dsUtils";
+import * as dsUtils from "../../src/utils/dsUtils";
 
 describe(`Module File Getter Tests`, () => {
     let moduleFileGetter: ModuleFileGetter;
@@ -93,7 +91,7 @@ describe(`Module File Getter Tests`, () => {
         // When mocking we reject the first file check as it will attempt to find
         // the concatenated module.
         if (UseMock) {
-            const moduleName = DSUtils.instance.getDSModuleName(moduleID);
+            const moduleName = dsUtils.getDSModuleName(moduleID);
             const concatPath = path.resolve(
                 webappsPath,
                 moduleName,
@@ -121,10 +119,10 @@ describe(`Module File Getter Tests`, () => {
         const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
         const moduleID = `DS/GEOCommonClient/Services/ServiceBase`;
 
-        const localWebApps = path.resolve(local, WIN_B64, WEB_APPS);
-        const BSFWebApps = path.resolve(BSF, WIN_B64, WEB_APPS);
-        const BSFTSTWebApps = path.resolve(BSFTST, WIN_B64, WEB_APPS);
-        const moduleName = DSUtils.instance.getDSModuleFilePath(moduleID);
+        const localWebApps = path.resolve(local, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const BSFWebApps = path.resolve(BSF, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const BSFTSTWebApps = path.resolve(BSFTST, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const moduleName = dsUtils.getDSModuleFilePath(moduleID);
 
         const LocalModuleFilePath = path.resolve(
             localWebApps,
@@ -166,14 +164,14 @@ describe(`Module File Getter Tests`, () => {
         const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
         const moduleID = `DS/ApplicationFrame/PlayerButton`;
 
-        const localWebApps = path.resolve(local, WIN_B64, WEB_APPS);
-        const BSFWebApps = path.resolve(BSF, WIN_B64, WEB_APPS);
-        const BSFTSTWebApps = path.resolve(BSFTST, WIN_B64, WEB_APPS);
+        const localWebApps = path.resolve(local, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const BSFWebApps = path.resolve(BSF, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const BSFTSTWebApps = path.resolve(BSFTST, dsUtils.WIN_B64, dsUtils.WEB_APPS);
 
         const expectedPath = path.resolve(
             BSF,
-            WIN_B64,
-            WEB_APPS,
+            dsUtils.WIN_B64,
+            dsUtils.WEB_APPS,
             `ApplicationFrame/ApplicationFrame.js`,
         );
 
@@ -206,14 +204,14 @@ describe(`Module File Getter Tests`, () => {
         const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
         const moduleID = `DS/ApplicationFrame/PlayerButton`;
 
-        const localWebApps = path.resolve(local, WIN_B64, WEB_APPS);
-        const BSFWebApps = path.resolve(BSF, WIN_B64, WEB_APPS);
-        const BSFTSTWebApps = path.resolve(BSFTST, WIN_B64, WEB_APPS);
+        const localWebApps = path.resolve(local, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const BSFWebApps = path.resolve(BSF, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const BSFTSTWebApps = path.resolve(BSFTST, dsUtils.WIN_B64, dsUtils.WEB_APPS);
 
         const expectedPath = path.resolve(
             BSF,
-            WIN_B64,
-            WEB_APPS,
+            dsUtils.WIN_B64,
+            dsUtils.WEB_APPS,
             `ApplicationFrame/ApplicationFrame.js`,
         );
 
@@ -255,9 +253,9 @@ describe(`Module File Getter Tests`, () => {
         const BSFTST = "\\\\ap-bri-san03b\\R422\\BSFTST";
         const moduleID = `DS/Fake/Fake`;
 
-        const localWebApps = path.resolve(local, WIN_B64, WEB_APPS);
-        const BSFWebApps = path.resolve(BSF, WIN_B64, WEB_APPS);
-        const BSFTSTWebApps = path.resolve(BSFTST, WIN_B64, WEB_APPS);
+        const localWebApps = path.resolve(local, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const BSFWebApps = path.resolve(BSF, dsUtils.WIN_B64, dsUtils.WEB_APPS);
+        const BSFTSTWebApps = path.resolve(BSFTST, dsUtils.WIN_B64, dsUtils.WEB_APPS);
 
         if (UseMock) {
             const pathMap = [

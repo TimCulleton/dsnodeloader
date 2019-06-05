@@ -1,6 +1,6 @@
 import http from "http";
 import https from "https";
-import { DSUtils } from "../utils/dsUtils";
+import * as dsUtils from "../utils/dsUtils";
 import { IModuleGetter } from "./moduleGetterTypes";
 import { IResponseData } from "./moduleGetterTypes";
 
@@ -133,7 +133,7 @@ export class ModuleWebGetter implements IModuleGetter {
      * requestData.requestPath === "http://localhost:8176/GEOCommonClient/Services/ServiceBase.js"
      */
     public async getModule(moduleID: string): Promise<IResponseData> {
-        const moduleName = DSUtils.instance.getDSModuleName(moduleID);
+        const moduleName = dsUtils.getDSModuleName(moduleID);
         let path = `/${moduleName}/${moduleName}.js`;
 
         const responseHandler = (inputData: IGetResponseData): IResponseData => {
@@ -150,7 +150,7 @@ export class ModuleWebGetter implements IModuleGetter {
             return responseHandler(responseData);
         // Single Module
         } else {
-            path = `/${DSUtils.instance.getDSModuleFilePath(moduleID)}.js`;
+            path = `/${dsUtils.getDSModuleFilePath(moduleID)}.js`;
             responseData = await this._getModuleImp(path);
             return responseHandler(responseData);
         }
