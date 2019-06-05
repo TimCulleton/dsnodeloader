@@ -7,3 +7,6 @@ node_modules/
 **/*.js.map
 
 !/jest.config.js
+
+# Track everything in here
+!/__tests__/testData/**/*
